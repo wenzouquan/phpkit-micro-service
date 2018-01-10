@@ -1,6 +1,7 @@
 <?php
 namespace phpkit\microservice\bin;
 require  'Socket.php';
+
 class HiService {
     public function say($data) {
         try {
@@ -16,8 +17,11 @@ class HiService {
         }catch (\Exception $e) {
            // $this->log('CODE:' . $e->getCode() . ' MESSAGE:' . $e->getMessage() . "\n" . $e->getTraceAsString());
             $returnMsg = $e;
+        }catch (\Error $e) { 
+            $returnMsg = $e;
         }
         return json_encode($returnMsg);
+       //return json_encode($content);
     }
 }
 
@@ -34,7 +38,11 @@ class Server
     protected $tMultiplexedProcessor;
     function __construct($config=array())
     {
-        $this->config = array_merge(require dirname(dirname(__FILE__)).'/config.php',$config) ;
+        $de_config =  require dirname(dirname(__FILE__)).'/config.php';
+        $set = array_merge($de_config['set'],isset($config['set'])?$config['set']:[]);
+        $this->config = array_merge($de_config,$config) ;
+        $this->config['set']=$set;
+        //var_dump( $this->config );
         $this->handler=new HiService();
     }
 
@@ -50,20 +58,22 @@ class Server
 
     public function onReceive($serv, $fd, $from_id, $data)
     {
-        if ( json_decode($data, true)) {//如果接收的是json数据,直接调用服务
-             $serv->task($data);
-        } else {//通thrifft调用
+        
+                if ( json_decode($data, true)) {//如果接收的是json数据,直接调用服务
+                     $serv->task($data);
+                } else {//通thrifft调用
 
-            //$serviceName = $this->getServiceName($serv, $fd, $from_id, $data);
-            $serviceName="Services\Demo\HiService";
-            $tMultiplexedProcessor = $this->addService($serviceName);
-            try {
-                $protocol = $this->getProtocol($serv, $fd, $from_id, $data);
-                $tMultiplexedProcessor->process($protocol, $protocol);
-            } catch (\Exception $e) {
-                $this->log('CODE:' . $e->getCode() . ' MESSAGE:' . $e->getMessage() . "\n" . $e->getTraceAsString());
-            }
-        }
+                    //$serviceName = $this->getServiceName($serv, $fd, $from_id, $data);
+                    $serviceName="Services\Demo\HiService";
+                    $tMultiplexedProcessor = $this->addService($serviceName);
+                    try {
+                        $protocol = $this->getProtocol($serv, $fd, $from_id, $data);
+                        $tMultiplexedProcessor->process($protocol, $protocol);
+                    } catch (\Exception $e) {
+                        $this->log('CODE:' . $e->getCode() . ' MESSAGE:' . $e->getMessage() . "\n" . $e->getTraceAsString());
+                    }
+                }
+   
     }
 
     public function onTask($serv, $task_id, $from_id, $data){
@@ -240,6 +250,7 @@ class Server
         $serv->on('Task', [$this, 'onTask']);
         $serv->on('Finish', [$this, 'onFinish']);
         $serv->set($this->config['set']);
+        print
         $this->log("生成服务配置");
         if($this->consul ){
             $this->addServiceToConsul();

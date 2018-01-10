@@ -15,8 +15,7 @@ class Client{
         $this->className = $serverName;
         if(is_array($this->serverips) && !empty($this->serverips)){
             $key = array_rand($this->serverips, 1); //随机找到一个服务
-            $ipAndPort = explode(":",$this->serverips[$key]);
-            $this->service = $this->client->getRPCService("Services\\Demo\\HiService",$ipAndPort[0],$ipAndPort[1]);
+            $this->ipAndPort = explode(":",$this->serverips[$key]);
         }
         return $this;
     }
@@ -28,9 +27,13 @@ class Client{
             'method'=>$name,
             'arguments'=>$arguments
         );
-        if(class_exists($this->className)){
+       // var_dump($this->service);
+        //exit();
+        if(!empty($this->className) && class_exists($this->className) && method_exists(new $this->className(),$name)){
             $returnMsg= call_user_func_array(array(new $this->className(), $name), $arguments);//如果服务在本地
-        }else if($this->service){
+        }else if( !empty($this->ipAndPort)){
+            $this->service = $this->client->getRPCService("Services\\Demo\\HiService",$this->ipAndPort[0],$this->ipAndPort[1]);
+            //var_dump($params);
             $returnMsg= json_decode($this->service->say(json_encode($params)),true);
         }else{
             throw new \Exception($this->className ." 类未定义 ", 1);

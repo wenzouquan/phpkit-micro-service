@@ -17,6 +17,10 @@ class Client{
             $key = array_rand($this->serverips, 1); //随机找到一个服务
             $this->ipAndPort = explode(":",$this->serverips[$key]);
         }
+        if($ip && $port){
+             $this->ipAndPort = [$ip,$port];
+             $this->useTcp=1;
+        }
         return $this;
     }
 
@@ -29,7 +33,10 @@ class Client{
         );
        // var_dump($this->service);
         //exit();
-        if(!empty($this->className) && class_exists($this->className) && method_exists(new $this->className(),$name)){
+        if($this->useTcp){
+             $this->service = $this->client->getRPCService("Services\\Demo\\HiService",$this->ipAndPort[0],$this->ipAndPort[1]);
+            $returnMsg= json_decode($this->service->say(json_encode($params)),true);
+        }else if(!empty($this->className) && class_exists($this->className) && method_exists(new $this->className(),$name)){
             $returnMsg= call_user_func_array(array(new $this->className(), $name), $arguments);//如果服务在本地
         }else if( !empty($this->ipAndPort)){
             $this->service = $this->client->getRPCService("Services\\Demo\\HiService",$this->ipAndPort[0],$this->ipAndPort[1]);

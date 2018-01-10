@@ -33,7 +33,7 @@ class Client{
         }else if($this->service){
             $returnMsg= json_decode($this->service->say(json_encode($params)),true);
         }else{
-            throw new \Exception($this->className() ." 类未定义 ", 1);
+            throw new \Exception($this->className ." 类未定义 ", 1);
             
         }
         return $returnMsg;

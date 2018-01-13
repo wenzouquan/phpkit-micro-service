@@ -2,6 +2,7 @@
 namespace phpkit\microservice;
 class Client{
     protected $service;
+    protected $serviceClients;
     function __construct($serverips=array())
     {
         $this->serverips=$serverips;
@@ -12,16 +13,17 @@ class Client{
     }
 
     function getService($serverName="",$ip="",$port=""){
-        $this->className = $serverName;
-        if(is_array($this->serverips) && !empty($this->serverips)){
-            $key = array_rand($this->serverips, 1); //随机找到一个服务
-            $this->ipAndPort = explode(":",$this->serverips[$key]);
+        $serviceClient = new self();
+        $serviceClient->className = $serverName;
+        if(is_array($serviceClient->serverips) && !empty($serviceClient->serverips)){
+            $key = array_rand($serviceClient->serverips, 1); //随机找到一个服务
+            $serviceClient->ipAndPort = explode(":",$serviceClient->serverips[$key]);
         }
         if($ip && $port){
-             $this->ipAndPort = [$ip,$port];
-             $this->useRpc=1;
+             $serviceClient->ipAndPort = [$ip,$port];
+             $serviceClient->useRpc=1;
         }
-        return $this;
+        return $serviceClient;
     }
 
     function __call($name, $arguments)

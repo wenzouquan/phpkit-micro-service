@@ -12,6 +12,9 @@ class Client{
         $this->client = new \phpkit\thriftrpc\Client($servicesApi);
     }
 
+    function get($serverName="",$ip="",$port=""){
+        return $this->getService($serverName,$ip,$port);
+    }
     function getService($serverName="",$ip="",$port=""){
         $serviceClient = new self();
         $serviceClient->className = $serverName;
@@ -45,7 +48,13 @@ class Client{
             //var_dump($params);
             $returnMsg= json_decode($this->service->say(json_encode($params)),true);
         }else{
-            throw new \Exception($this->className ." 类未定义 ", 1);
+            if(!class_exists($this->className)){
+                $error = $this->className ." 类未定义 ";
+            }else if(!method_exists(new $this->className(),$name)){
+                $error = $this->className ."中 {$name} 方法未定义 ";
+            }
+
+            throw new \Exception($error, 1);
             
         }
         return $returnMsg;

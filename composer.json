@@ -12,6 +12,7 @@
     "autoload": {
         "psr-4": {
             "phpkit\\microservice\\": "./"
-        }
+        },
+        "files": ["functions.php"]
     }
 }

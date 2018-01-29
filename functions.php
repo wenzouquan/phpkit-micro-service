@@ -32,8 +32,9 @@ class StoreArg{
 
 
 }
-$storeArg = new StoreArg();
-function args(){
-	return $storeArg;
-}
 
+$GLOBALS['storeArg2018028bywinn'] = new StoreArg();
+
+function args(){
+	return $GLOBALS['storeArg2018028bywinn'];
+}

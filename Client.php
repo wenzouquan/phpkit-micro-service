@@ -12,9 +12,9 @@ class Client{
         $this->client = new \phpkit\thriftrpc\Client($servicesApi);
     }
 
-    function get($serverName="",$ip="",$port=""){
-        return $this->getService($serverName,$ip,$port);
-    }
+    // function get($serverName="",$ip="",$port=""){
+    //     return $this->getService($serverName,$ip,$port);
+    // }
     function getService($serverName="",$ip="",$port=""){
         $serviceClient = new self($this->serverips);
         $serviceClient->className = $serverName;
@@ -22,13 +22,13 @@ class Client{
             $serviceClient->ipAndPort = $this->randIp();
         }
         if($ip && $port){
-            $serviceClient->ipAndPort = [$ip,$port];
-            $serviceClient->useRpc=1;
+             $serviceClient->ipAndPort = [$ip,$port];
+             $serviceClient->useRpc=1;
         }
         return $serviceClient;
     }
 //随机取一个ip
-    function randIp($disableIps=[]){
+     function randIp($disableIps=[]){
         $find=1;
         $ip="";
         $i=1;
@@ -39,18 +39,18 @@ class Client{
                 $find =0;
             }
             if($i==count($this->serverips)){
-                $find =0;
+                 $find =0;
             }
             $i++;
         }
         $ipAndPort = explode(":",$ip);
         return $ipAndPort;
-    }
+     }
     //类中所有属性
-    function getVars(){
-        $class_vals = get_object_vars($this);
-        return $class_vals ;
-    }
+     function getVars(){
+         $class_vals = get_object_vars($this);
+         return $class_vals ;
+     }
 
     function __call($name, $arguments)
     {
@@ -73,7 +73,7 @@ class Client{
             }
             $returnMsg= call_user_func_array(array($obj, $name), $arguments);//如果服务在本地
         }else if( !empty($this->ipAndPort)){
-            //使用tcp服务
+           //使用tcp服务
             $disableIps=[];//异常ip
             $tryCount = 5;
             $findService=1;
@@ -81,36 +81,36 @@ class Client{
             $allError=[];
             //在ip内查找服务
             while($findService==1) {
-                $error="";
-                try{
-                    $this->service = $this->client->getRPCService("Services\\Demo\\HiService",$this->ipAndPort[0],$this->ipAndPort[1]);
+               $error="";
+               try{
+                  $this->service = $this->client->getRPCService("Services\\Demo\\HiService",$this->ipAndPort[0],$this->ipAndPort[1]);
                 } catch (\Exception $e) {
                     $error= $e->getMessage();
                 }catch (\Error $e) {
-                    $error = $e;
-                }
+                     $error = $e;
+                 }
                 if(!empty($error)){
-                    $ip = $this->ipAndPort[0].":".$this->ipAndPort[1];
-                    $disableIps[$ip]=$ip ;
-                    $error.=" 来自 ".$ip;
-                    //  echo $error."</br>";
-                    $allError[]=$error;
-                    $this->ipAndPort = $this->randIp($disableIps);
-                }
-                $tryCount--;
-                if(count($disableIps)==count($this->serverips)){
+                     $ip = $this->ipAndPort[0].":".$this->ipAndPort[1];
+                     $disableIps[$ip]=$ip ;
+                     $error.=" 来自 ".$ip;
+                   //  echo $error."</br>";
+                     $allError[]=$error;
+                     $this->ipAndPort = $this->randIp($disableIps);
+               }
+               $tryCount--;
+               if(count($disableIps)==count($this->serverips)){
                     $findService=0;
-                }
-                if($tryCount<1){
-                    $findService=0;
-                }
+               }
+               if($tryCount<1){
+                   $findService=0;
+               }
             }
 
             if($this->service){
                 $returnMsg= json_decode($this->service->say(json_encode($params)),true);
             }else{
                 //$returnMsg = $allError;
-                throw new \Exception(serialize ($allError), 1);
+                 throw new \Exception(serialize ($allError), 1);
             }
         }else{
             if(!class_exists($this->className)){

@@ -54,7 +54,7 @@ class Socket extends \Thrift\Transport\TFramedTransport {
 		return $out;
 	}
 
-	public function write($buf) {
+	public function write($buf,$len = NULL) {
 		$this->wBuf_ .= $buf;
 	}
 
